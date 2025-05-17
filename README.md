@@ -10,6 +10,7 @@ It has 4 classes:
 It was created to use with OpenGL in 2D Apps!
 
 How to use:
+
 math::vec2 vector(0.0f, 0.0f);
 
 math::vec2 vector2(1.0f, 5.0f);
