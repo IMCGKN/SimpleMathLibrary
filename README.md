@@ -10,8 +10,8 @@ It has 4 classes:
 It was created to use with OpenGL in 2D Apps!
 
 How to use:
-vec2 vector(0.0f, 0.0f);
-vec2 vector2(1.0f, 5.0f);
-vec2 result = vector + vector2;
+math::vec2 vector(0.0f, 0.0f);
+math::vec2 vector2(1.0f, 5.0f);
+math::vec2 result = vector + vector2;
 
 std::cout << result.PrintData() << '\n';
