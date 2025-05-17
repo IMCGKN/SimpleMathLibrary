@@ -7,7 +7,7 @@ It has 4 classes:
 - vec4
 - mat4
 
-It was created to use with OpenGL in 2D Apps!
+It was created to use in C++ with OpenGL in 2D Apps!
 
 How to use:
 
