@@ -11,7 +11,10 @@ It was created to use with OpenGL in 2D Apps!
 
 How to use:
 math::vec2 vector(0.0f, 0.0f);
+
 math::vec2 vector2(1.0f, 5.0f);
+
 math::vec2 result = vector + vector2;
+
 
 std::cout << result.PrintData() << '\n';
