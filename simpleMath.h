@@ -3,9 +3,17 @@
 #include <cmath>
 #include <string>
 #include <cstring>
+#include <iostream>
 
 namespace math
 {
+	constexpr float PI = 3.14159265f;
+
+	static float ToRadians(float degrees)
+	{
+		return degrees * (PI / 180.0f);
+	}
+
 	class vec2
 	{
 	public:
@@ -239,12 +247,6 @@ namespace math
 			return x * x + y * y + z * z;
 		}
 
-		vec3 normalized() const
-		{
-			float len = length();
-			return (len == 0) ? vec3() : vec3(x / len, y / len, z / len);
-		}
-
 		void normalize()
 		{
 			float len = length();
@@ -278,6 +280,21 @@ namespace math
 		}
 	};
 
+	static vec3 cross(const vec3& other1, const vec3& other2)
+	{
+		vec3 result = vec3();
+		result.x = other1.y * other2.z - other1.z * other2.y;
+		result.y = other1.z * other2.x - other1.x * other2.z;
+		result.z = other1.x * other2.y - other1.y * other2.x;
+		return result;
+	}
+
+	static vec3 normalize(const vec3& vec)
+	{
+		float len = vec.length();
+		return (len == 0) ? vec3() : vec3(vec.x / len, vec.y / len, vec.z / len);
+	}
+
 	class vec4
 	{
 	public:
@@ -287,6 +304,15 @@ namespace math
 		float w;
 
 	public:
+		vec4()
+			: x(0.0f), y(0.0f), z(0.0f), w(0.0f)
+		{ }
+
+		vec4(float _x, float _y, float _z, float _w)
+			: x(_x), y(_y), z(_z), w(_w)
+		{
+		}
+
 		const float* data() const
 		{
 			return &x;
@@ -319,36 +345,176 @@ namespace math
 			return mat4();
 		}
 
-		mat4 translate(vec3 vec)
+		void translate(vec3 vec)
 		{
-			mat4 result = identity();
-			result.mat[0 + 3 * 4] = vec.x;
-			result.mat[1 + 3 * 4] = vec.y;
-			result.mat[2 + 3 * 4] = vec.z;
-			return result;
+			mat[0 + 3 * 4] = vec.x;
+			mat[1 + 3 * 4] = vec.y;
+			mat[2 + 3 * 4] = vec.z;
 		}
 
-		mat4 scale(vec3 vec)
+		void scale(vec3 vec)
 		{
-			mat4 result = identity();
-			result.mat[0 + 0 * 4] = vec.x;
-			result.mat[1 + 1 * 4] = vec.y;
-			result.mat[2 + 2 * 4] = vec.z;
-			return result;
+			mat[0 + 0 * 4] = vec.x;
+			mat[1 + 1 * 4] = vec.y;
+			mat[2 + 2 * 4] = vec.z;
 		}
 
-		mat4 rotateZ(float angle)
+		void rotateZ(float angle)
 		{
-			mat4 result = identity();
 			float cosinus = cos(angle);
 			float sinus = sin(angle);
 			
-			result.mat[0 + 0 * 4] = cosinus;
-			result.mat[0 + 1 * 4] =-sinus;
-			result.mat[1 + 0 * 4] = sinus;
-			result.mat[1 + 1 * 4] = cosinus;
+			mat[0 + 0 * 4] =  cosinus;
+			mat[0 + 1 * 4] = -sinus;
+			mat[1 + 0 * 4] =  sinus;
+			mat[1 + 1 * 4] =  cosinus;
+		}
+
+		mat4 operator*(const mat4& other)
+		{
+			mat4 result = mat4();
+
+			result.mat[0 + 0 * 4] = mat[0 + 0 * 4] * other.mat[0 + 0 * 4] + 
+									mat[1 + 0 * 4] * other.mat[1 + 0 * 4] + 
+									mat[2 + 0 * 4] * other.mat[2 + 0 * 4] + 
+									mat[3 + 0 * 4] * other.mat[3 + 0 * 4];
+
+			result.mat[0 + 1 * 4] = mat[0 + 0 * 4] * other.mat[0 + 1 * 4] + 
+									mat[1 + 0 * 4] * other.mat[1 + 1 * 4] + 
+									mat[2 + 0 * 4] * other.mat[2 + 1 * 4] + 
+									mat[3 + 0 * 4] * other.mat[3 + 1 * 4];
+			
+			result.mat[0 + 2 * 4] = mat[0 + 0 * 4] * other.mat[0 + 2 * 4] + 
+									mat[1 + 0 * 4] * other.mat[1 + 2 * 4] + 
+									mat[2 + 0 * 4] * other.mat[2 + 2 * 4] + 
+									mat[3 + 0 * 4] * other.mat[3 + 2 * 4];
+			
+			result.mat[0 + 3 * 4] = mat[0 + 0 * 4] * other.mat[0 + 3 * 4] + 
+									mat[1 + 0 * 4] * other.mat[1 + 3 * 4] + 
+									mat[2 + 0 * 4] * other.mat[2 + 3 * 4] + 
+									mat[3 + 0 * 4] * other.mat[3 + 3 * 4];
+
+			result.mat[1 + 0 * 4] = mat[0 + 1 * 4] * other.mat[0 + 0 * 4] + 
+									mat[1 + 1 * 4] * other.mat[1 + 0 * 4] + 
+									mat[2 + 1 * 4] * other.mat[2 + 0 * 4] + 
+									mat[3 + 1 * 4] * other.mat[3 + 0 * 4];
+
+			result.mat[1 + 1 * 4] = mat[0 + 1 * 4] * other.mat[0 + 1 * 4] + 
+									mat[1 + 1 * 4] * other.mat[1 + 1 * 4] + 
+									mat[2 + 1 * 4] * other.mat[2 + 1 * 4] + 
+									mat[3 + 1 * 4] * other.mat[3 + 1 * 4];
+			
+			result.mat[1 + 2 * 4] = mat[0 + 1 * 4] * other.mat[0 + 2 * 4] + 
+									mat[1 + 1 * 4] * other.mat[1 + 2 * 4] + 
+									mat[2 + 1 * 4] * other.mat[2 + 2 * 4] + 
+									mat[3 + 1 * 4] * other.mat[3 + 2 * 4];
+			
+			result.mat[1 + 3 * 4] = mat[0 + 1 * 4] * other.mat[0 + 3 * 4] + 
+									mat[1 + 1 * 4] * other.mat[1 + 3 * 4] + 
+									mat[2 + 1 * 4] * other.mat[2 + 3 * 4] + 
+									mat[3 + 1 * 4] * other.mat[3 + 3 * 4];
+
+			result.mat[2 + 0 * 4] = mat[0 + 2 * 4] * other.mat[0 + 0 * 4] + 
+									mat[1 + 2 * 4] * other.mat[1 + 0 * 4] + 
+									mat[2 + 2 * 4] * other.mat[2 + 0 * 4] + 
+									mat[3 + 2 * 4] * other.mat[3 + 0 * 4];
+
+			result.mat[2 + 1 * 4] = mat[0 + 2 * 4] * other.mat[0 + 1 * 4] + 
+									mat[1 + 2 * 4] * other.mat[1 + 1 * 4] + 
+									mat[2 + 2 * 4] * other.mat[2 + 1 * 4] + 
+									mat[3 + 2 * 4] * other.mat[3 + 1 * 4];
+			
+			result.mat[2 + 2 * 4] = mat[0 + 2 * 4] * other.mat[0 + 2 * 4] + 
+									mat[1 + 2 * 4] * other.mat[1 + 2 * 4] + 
+									mat[2 + 2 * 4] * other.mat[2 + 2 * 4] + 
+									mat[3 + 2 * 4] * other.mat[3 + 2 * 4];
+			
+			result.mat[2 + 3 * 4] = mat[0 + 2 * 4] * other.mat[0 + 3 * 4] + 
+									mat[1 + 2 * 4] * other.mat[1 + 3 * 4] + 
+									mat[2 + 2 * 4] * other.mat[2 + 3 * 4] + 
+									mat[3 + 2 * 4] * other.mat[3 + 3 * 4];
+
+			result.mat[3 + 0 * 4] = mat[0 + 3 * 4] * other.mat[0 + 0 * 4] + 
+									mat[1 + 3 * 4] * other.mat[1 + 0 * 4] + 
+									mat[2 + 3 * 4] * other.mat[2 + 0 * 4] + 
+									mat[3 + 3 * 4] * other.mat[3 + 0 * 4];
+
+			result.mat[3 + 1 * 4] = mat[0 + 3 * 4] * other.mat[0 + 1 * 4] + 
+									mat[1 + 3 * 4] * other.mat[1 + 1 * 4] + 
+									mat[2 + 3 * 4] * other.mat[2 + 1 * 4] + 
+									mat[3 + 3 * 4] * other.mat[3 + 1 * 4];
+			
+			result.mat[3 + 2 * 4] = mat[0 + 3 * 4] * other.mat[0 + 2 * 4] + 
+									mat[1 + 3 * 4] * other.mat[1 + 2 * 4] + 
+									mat[2 + 3 * 4] * other.mat[2 + 2 * 4] + 
+									mat[3 + 3 * 4] * other.mat[3 + 2 * 4];
+			
+			result.mat[3 + 3 * 4] = mat[0 + 3 * 4] * other.mat[0 + 3 * 4] + 
+									mat[1 + 3 * 4] * other.mat[1 + 3 * 4] + 
+									mat[2 + 3 * 4] * other.mat[2 + 3 * 4] + 
+									mat[3 + 3 * 4] * other.mat[3 + 3 * 4];
 
 			return result;
 		}
-	};
+
+		float& operator[](int i)
+		{
+			return mat[i];
+		}
+	}; 
+	
+	mat4 perspective(float fovInRadians, float aspectRatio, float near, float far)
+	{
+		mat4 result;
+		result[0 + 0 * 4] = 1.0f / (aspectRatio * tanf(fovInRadians / 2.0f));
+		result[1 + 1 * 4] = 1.0f / (tanf(fovInRadians / 2.0f));
+		result[2 + 2 * 4] = -((far + near) / (far - near));
+		result[2 + 3 * 4] = -((2.0f * far * near) / (far - near));
+		result[3 + 2 * 4] = -1.0f;
+		result[3 + 3 * 4] = 0.0f;
+
+		return result;
+	}
+
+	mat4 orthographic(float left, float right, float bottom, float top, float far = 0.0f, float near = 1.0f)
+	{
+		mat4 result = mat4();
+
+		result[0 + 0 * 4] = 2.0f / (right - left);
+		result[1 + 1 * 4] = 2.0f / (top - bottom);
+		result[2 + 2 * 4] = -2.0f / (far - near);
+
+		result[3 + 0 * 4] = -(right + left) / (right - left);
+		result[3 + 1 * 4] = -(top + bottom) / (top - bottom);
+		result[3 + 2 * 4] = -(far + near) / (far - near);
+
+		return result;
+	}
+
+	mat4 lookAt(const vec3& eye, const vec3& target, const vec3& upVec)
+	{
+		vec3 forward = normalize(eye - target);
+		vec3 right = normalize(cross(upVec, forward));
+		vec3 up = cross(forward, right);
+
+		mat4 orientation = mat4();
+		orientation[0 + 0 * 4] = right.x;
+		orientation[0 + 1 * 4] = up.x;
+		orientation[0 + 2 * 4] = forward.x;
+
+		orientation[1 + 0 * 4] = right.y;
+		orientation[1 + 1 * 4] = up.y;
+		orientation[1 + 2 * 4] = forward.y;
+
+		orientation[2 + 0 * 4] = right.z;
+		orientation[2 + 1 * 4] = up.z;
+		orientation[2 + 2 * 4] = forward.z;
+
+		mat4 translation = mat4();
+		translation[3 + 0 * 4] = -eye.x;
+		translation[3 + 1 * 4] = -eye.y;
+		translation[3 + 2 * 4] = -eye.z;
+
+		return (orientation * translation);
+	}
 }
