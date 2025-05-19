@@ -9,6 +9,10 @@ It has 4 classes:
 
 It was created to use in C++ with OpenGL in 2D Apps!
 
+You can use lookAt mat4 functions to create cameras in OpenGL!
+
+There are orthographic and perspective functions for Projection Matrices!
+
 How to use:
 
 math::vec2 vector(0.0f, 0.0f);
