@@ -477,7 +477,7 @@ namespace math
 		vec3 normalizedAxis = normalize(axis);
 		float cosinus = cos(angle);
 		float sinus = sin(angle);
-		float oneMinusCosA = 1.0f - cosinus;
+		float oneMinusCosinus = 1.0f - cosinus;
 
 		float x = normalizedAxis.x;
 		float y = normalizedAxis.y;
@@ -485,17 +485,17 @@ namespace math
 
 		mat4 result = mat4();
 
-		result[0 + 0 * 4] = cosinus + x * x * oneMinusCosA;
-		result[0 + 1 * 4] = x * y * oneMinusCosA - z * sinus;
-		result[0 + 2 * 4] = x * z * oneMinusCosA + y * sinus;
+		result[0 + 0 * 4] = cosinus + x * x * oneMinusCosinus;
+		result[0 + 1 * 4] = x * y * oneMinusCosinus - z * sinus;
+		result[0 + 2 * 4] = x * z * oneMinusCosinus + y * sinus;
 
-		result[1 + 0 * 4] = y * x * oneMinusCosA + z * sinus;
-		result[1 + 1 * 4] = cosinus + y * y * oneMinusCosA;
-		result[1 + 2 * 4] = y * z * oneMinusCosA - x * sinus;
+		result[1 + 0 * 4] = y * x * oneMinusCosinus + z * sinus;
+		result[1 + 1 * 4] = cosinus + y * y * oneMinusCosinus;
+		result[1 + 2 * 4] = y * z * oneMinusCosinus - x * sinus;
 
-		result[2 + 0 * 4] = z * x * oneMinusCosA - y * sinus;
-		result[2 + 1 * 4] = z * y * oneMinusCosA + x * sinus;
-		result[2 + 2 * 4] = cosinus + z * z * oneMinusCosA;
+		result[2 + 0 * 4] = z * x * oneMinusCosinus - y * sinus;
+		result[2 + 1 * 4] = z * y * oneMinusCosinus + x * sinus;
+		result[2 + 2 * 4] = cosinus + z * z * oneMinusCosinus;
 
 		return result;
 	}
