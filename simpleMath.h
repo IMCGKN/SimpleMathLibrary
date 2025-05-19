@@ -9,7 +9,7 @@ namespace math
 {
 	constexpr float PI = 3.14159265f;
 
-	static float ToRadians(float degrees)
+	constexpr static float ToRadians(float degrees)
 	{
 		return degrees * (PI / 180.0f);
 	}
@@ -298,29 +298,33 @@ namespace math
 	class vec4
 	{
 	public:
-		float x;
-		float y;
-		float z;
-		float w;
+		float vec[4];
 
 	public:
 		vec4()
-			: x(0.0f), y(0.0f), z(0.0f), w(0.0f)
-		{ }
+		{ 
+			vec[0] = 0.0f;
+			vec[1] = 0.0f;
+			vec[2] = 0.0f;
+			vec[3] = 0.0f;
+		}
 
 		vec4(float _x, float _y, float _z, float _w)
-			: x(_x), y(_y), z(_z), w(_w)
 		{
+			vec[0] = _x;
+			vec[1] = _y;
+			vec[2] = _z;
+			vec[3] = _w;
 		}
 
 		const float* data() const
 		{
-			return &x;
+			return &vec[0];
 		}
 
 		std::string PrintData() const
 		{
-			std::string data = "Vec4(X: " + std::to_string(x) + ", Y: " + std::to_string(y) + ", Z: " + std::to_string(z) + ", W: " + std::to_string(w) + ").";
+			std::string data = "Vec4(X: " + std::to_string(vec[0]) + ", Y: " + std::to_string(vec[1]) + ", Z: " + std::to_string(vec[2]) + ", W: " + std::to_string(vec[3]) + ").";
 			return data;
 		}
 	};
@@ -345,36 +349,11 @@ namespace math
 			return mat4();
 		}
 
-		void translate(vec3 vec)
-		{
-			mat[0 + 3 * 4] = vec.x;
-			mat[1 + 3 * 4] = vec.y;
-			mat[2 + 3 * 4] = vec.z;
-		}
-
-		void scale(vec3 vec)
-		{
-			mat[0 + 0 * 4] = vec.x;
-			mat[1 + 1 * 4] = vec.y;
-			mat[2 + 2 * 4] = vec.z;
-		}
-
-		void rotateZ(float angle)
-		{
-			float cosinus = cos(angle);
-			float sinus = sin(angle);
-			
-			mat[0 + 0 * 4] =  cosinus;
-			mat[0 + 1 * 4] = -sinus;
-			mat[1 + 0 * 4] =  sinus;
-			mat[1 + 1 * 4] =  cosinus;
-		}
-
 		mat4 operator*(const mat4& other)
 		{
 			mat4 result = mat4();
 
-			result.mat[0 + 0 * 4] = mat[0 + 0 * 4] * other.mat[0 + 0 * 4] + 
+			/*result.mat[0 + 0 * 4] = mat[0 + 0 * 4] * other.mat[0 + 0 * 4] + 
 									mat[1 + 0 * 4] * other.mat[1 + 0 * 4] + 
 									mat[2 + 0 * 4] * other.mat[2 + 0 * 4] + 
 									mat[3 + 0 * 4] * other.mat[3 + 0 * 4];
@@ -452,7 +431,21 @@ namespace math
 			result.mat[3 + 3 * 4] = mat[0 + 3 * 4] * other.mat[0 + 3 * 4] + 
 									mat[1 + 3 * 4] * other.mat[1 + 3 * 4] + 
 									mat[2 + 3 * 4] * other.mat[2 + 3 * 4] + 
-									mat[3 + 3 * 4] * other.mat[3 + 3 * 4];
+									mat[3 + 3 * 4] * other.mat[3 + 3 * 4];*/
+
+
+			for (int row = 0; row < 4; row++)
+			{
+				for (int col = 0; col < 4; col++)
+				{
+					result.mat[col + row * 4] =
+						mat[0 + row * 4] * other.mat[col + 0 * 4] +
+						mat[1 + row * 4] * other.mat[col + 1 * 4] +
+						mat[2 + row * 4] * other.mat[col + 2 * 4] +
+						mat[3 + row * 4] * other.mat[col + 3 * 4];
+				}
+			}
+			return result;
 
 			return result;
 		}
@@ -461,11 +454,17 @@ namespace math
 		{
 			return mat[i];
 		}
+
+		const float* data() const
+		{
+			return &mat[0];
+		}
 	}; 
 	
-	mat4 perspective(float fovInRadians, float aspectRatio, float near, float far)
+	static mat4 perspective(float fovInRadians, float aspectRatio, float near, float far)
 	{
-		mat4 result;
+		mat4 result = mat4();
+
 		result[0 + 0 * 4] = 1.0f / (aspectRatio * tanf(fovInRadians / 2.0f));
 		result[1 + 1 * 4] = 1.0f / (tanf(fovInRadians / 2.0f));
 		result[2 + 2 * 4] = -((far + near) / (far - near));
@@ -476,7 +475,7 @@ namespace math
 		return result;
 	}
 
-	mat4 orthographic(float left, float right, float bottom, float top, float far = 0.0f, float near = 1.0f)
+	static mat4 orthographic(float left, float right, float bottom, float top, float far = 0.0f, float near = 1.0f)
 	{
 		mat4 result = mat4();
 
@@ -486,14 +485,14 @@ namespace math
 
 		result[3 + 0 * 4] = -(right + left) / (right - left);
 		result[3 + 1 * 4] = -(top + bottom) / (top - bottom);
-		result[3 + 2 * 4] = -(far + near) / (far - near);
+		result[3 + 2 * 4] = - near / (far - near);
 
 		return result;
 	}
 
-	mat4 lookAt(const vec3& eye, const vec3& target, const vec3& upVec)
+	static mat4 lookAt(const vec3& eye, const vec3& target, const vec3& upVec)
 	{
-		vec3 forward = normalize(eye - target);
+		vec3 forward = normalize(target - eye);
 		vec3 right = normalize(cross(upVec, forward));
 		vec3 up = cross(forward, right);
 
@@ -516,5 +515,69 @@ namespace math
 		translation[3 + 2 * 4] = -eye.z;
 
 		return (orientation * translation);
+	}
+	
+	static mat4 translate(vec3 vec)
+	{
+		mat4 result = mat4();
+		result[0 + 3 * 4] = vec.x;
+		result[1 + 3 * 4] = vec.y;
+		result[2 + 3 * 4] = vec.z;
+		return result;
+	}
+
+	static mat4 translate(vec2 vec)
+	{
+		mat4 result = mat4();
+		result[0 + 3 * 4] = vec.x;
+		result[1 + 3 * 4] = vec.y;
+		result[2 + 3 * 4] = 0.0f;
+		return result;
+	}
+
+	static mat4 scale(vec3 vec)
+	{
+		mat4 result = mat4();
+		result[0 + 0 * 4] = vec.x;
+		result[1 + 1 * 4] = vec.y;
+		result[2 + 2 * 4] = vec.z;
+		return result;
+	}
+
+	static mat4 scale(vec2 vec)
+	{
+		mat4 result = mat4();
+		result[0 + 0 * 4] = vec.x;
+		result[1 + 1 * 4] = vec.y;
+		result[2 + 2 * 4] = 1.0f;
+		return result;
+	}
+
+	static mat4 rotate(const vec3& axis, float angle)
+	{
+		vec3 normalizedAxis = normalize(axis);
+		float cosinus = cos(angle);
+		float sinus = sin(angle);
+		float oneMinusCosA = 1.0f - cosinus;
+
+		float x = normalizedAxis.x;
+		float y = normalizedAxis.y;
+		float z = normalizedAxis.z;
+
+		mat4 result = mat4();
+
+		result[0 + 0 * 4] = cosinus + x * x * oneMinusCosA;
+		result[0 + 1 * 4] = x * y * oneMinusCosA - z * sinus;
+		result[0 + 2 * 4] = x * z * oneMinusCosA + y * sinus;
+
+		result[1 + 0 * 4] = y * x * oneMinusCosA + z * sinus;
+		result[1 + 1 * 4] = cosinus + y * y * oneMinusCosA;
+		result[1 + 2 * 4] = y * z * oneMinusCosA - x * sinus;
+
+		result[2 + 0 * 4] = z * x * oneMinusCosA - y * sinus;
+		result[2 + 1 * 4] = z * y * oneMinusCosA + x * sinus;
+		result[2 + 2 * 4] = cosinus + z * z * oneMinusCosA;
+
+		return result;
 	}
 }
